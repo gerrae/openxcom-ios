@@ -13,13 +13,31 @@ jobs:
           ref: oxce-plus
           submodules: recursive
 
-      - name: List schemes
+      - name: Diagnostic - List directory structure
+        continue-on-error: true
         run: |
-          echo "=== Listing all schemes and targets ==="
-          xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj 2>&1 | tee scheme-list.txt
+          echo "=== Contents of Sources/OpenXcom/xcode-ios ==="
+          ls -la Sources/OpenXcom/xcode-ios/ || echo "Directory not found"
           echo ""
-          echo "=== Scheme list saved above ==="
-          cat scheme-list.txt
+          echo "=== Find all .xcodeproj and .xcworkspace ==="
+          find Sources/OpenXcom -type d \( -name "*.xcodeproj" -o -name "*.xcworkspace" \) || echo "None found"
+          echo ""
+          echo "=== List directory tree ==="
+          ls -la Sources/OpenXcom/ || echo "Sources/OpenXcom not found"
+
+      - name: Diagnostic - List schemes from project
+        continue-on-error: true
+        run: |
+          echo "=== Attempting to list schemes ==="
+          xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj || echo "Project list failed"
+          echo "List attempt completed"
+
+      - name: Diagnostic - List schemes from workspace
+        continue-on-error: true
+        run: |
+          echo "=== Attempting to list schemes from workspace ==="
+          xcodebuild -list -workspace Sources/OpenXcom/xcode-ios/OpenXcom.xcworkspace || echo "Workspace list failed"
+          echo "Workspace list attempt completed"
 
       - name: Build unsigned archive
         run: |
