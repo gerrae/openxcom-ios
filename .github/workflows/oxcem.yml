@@ -1,0 +1,55 @@
+name: Unsigned OXCEM IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: oxce-plus
+          submodules: recursive
+
+      - name: Merge WarStalkeR's OpenXcomExMore into the source tree
+        run: |
+          cd Sources/OpenXcom
+          git config user.name "CI"
+          git config user.email "ci@example.com"
+          git remote add oxcem https://github.com/WarStalkeR/OpenXcomExMore
+          git fetch oxcem master --depth 200
+          git merge FETCH_HEAD --no-edit -m "Merge OXCEM master"
+
+      - name: List targets
+        run: xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj
+
+      - name: Build unsigned app
+        run: |
+          xcodebuild build \
+            -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj \
+            -target Game \
+            -configuration Release \
+            -sdk iphoneos \
+            SYMROOT="$(pwd)/build/sym" \
+            OBJROOT="$(pwd)/build/obj" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Package IPA
+        run: |
+          mkdir -p build/ipa/Payload
+          APP=$(find build/sym -name '*.app' -type d | head -1)
+          if [ -z "$APP" ]; then
+            echo "ERROR: No .app found"
+            find build/sym -name '*.app'
+            exit 1
+          fi
+          cp -R "$APP" build/ipa/Payload/
+          cd build/ipa && zip -r OpenXcom-unsigned.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openxcom-unsigned-ipa
+          path: build/ipa/OpenXcom-unsigned.ipa
