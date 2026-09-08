@@ -9,16 +9,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          repository: MeridianOXC/openxcom-ios
           ref: oxce-plus
           submodules: recursive
-
-      - name: Verify submodule checkout
-        run: |
-          echo "Contents of Sources/OpenXcom:"
-          ls -la Sources/OpenXcom/ || echo "ERROR: Sources/OpenXcom not found"
-          echo ""
-          echo "Looking for xcode-ios:"
-          find Sources/OpenXcom -maxdepth 2 -name "xcode-ios" -type d || echo "ERROR: xcode-ios directory not found"
 
       - name: List schemes
         run: xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj
