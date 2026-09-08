@@ -1,0 +1,40 @@
+name: Build Unsigned IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: oxce-plus
+          submodules: recursive
+
+      - name: List schemes
+        run: xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj
+
+      - name: Build unsigned archive
+        run: |
+          xcodebuild archive \
+            -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj \
+            -scheme OpenXcom \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/OpenXcom.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Package IPA
+        run: |
+          mkdir -p build/Payload
+          APP=$(find build/OpenXcom.xcarchive/Products/Applications -maxdepth 1 -name '*.app' | head -1)
+          cp -R "$APP" build/Payload/
+          cd build && zip -r OpenXcom-unsigned.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openxcom-unsigned-ipa
+          path: build/OpenXcom-unsigned.ipa
