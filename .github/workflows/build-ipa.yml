@@ -19,7 +19,7 @@ jobs:
         run: |
           xcodebuild build \
             -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj \
-            -target OpenXcom \
+            -target Game \
             -configuration Release \
             -sdk iphoneos \
             SYMROOT="$(pwd)/build/sym" \
