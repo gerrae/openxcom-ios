@@ -1,4 +1,4 @@
-name: Unsigned OXCEM IPA
+name: Build Unsigned IPA (OXCEM)
 
 on:
   workflow_dispatch:
@@ -15,11 +15,11 @@ jobs:
       - name: Merge WarStalkeR's OpenXcomExMore into the source tree
         run: |
           cd Sources/OpenXcom
-          git config user.name "CI"
-          git config user.email "ci@example.com"
+          git config user.name "De Rp"
+          git config user.email "donotemail@email.com"
           git remote add oxcem https://github.com/WarStalkeR/OpenXcomExMore
-          git fetch oxcem master --depth 200
-          git merge FETCH_HEAD --no-edit -m "Merge OXCEM master"
+          git fetch oxcem HEAD --depth 200
+          git merge FETCH_HEAD --no-edit -m "Merge OXCEM"
 
       - name: List targets
         run: xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj
@@ -51,5 +51,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: openxcom-unsigned-ipa
+          name: openxcom-oxcem-unsigned-ipa
           path: build/ipa/OpenXcom-unsigned.ipa
