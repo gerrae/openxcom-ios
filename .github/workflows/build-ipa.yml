@@ -14,7 +14,12 @@ jobs:
           submodules: recursive
 
       - name: List schemes
-        run: xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj
+        run: |
+          echo "=== Available Schemes ==="
+          xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj || true
+          echo ""
+          echo "=== Checking project structure ==="
+          ls -la Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj/ || echo "Project not found"
 
       - name: Build unsigned archive
         run: |
