@@ -12,30 +12,29 @@ jobs:
           ref: oxce-plus
           submodules: recursive
 
-      - name: List targets
+      - name: List schemes
         run: xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj
 
-      - name: Build unsigned app
+      - name: Build unsigned archive
         run: |
-          xcodebuild build \
+          xcodebuild archive \
             -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj \
-            -target OpenXcom \
+            -scheme OpenXcom \
             -configuration Release \
             -sdk iphoneos \
-            SYMROOT="$(pwd)/build/sym" \
-            OBJROOT="$(pwd)/build/obj" \
+            -archivePath build/OpenXcom.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY=""
 
       - name: Package IPA
         run: |
-          mkdir -p build/ipa/Payload
-          APP=$(find build/sym -name '*.app' -type d | head -1)
-          cp -R "$APP" build/ipa/Payload/
-          cd build/ipa && zip -r OpenXcom-unsigned.ipa Payload
+          mkdir -p build/Payload
+          APP=$(find build/OpenXcom.xcarchive/Products/Applications -maxdepth 1 -name '*.app' | head -1)
+          cp -R "$APP" build/Payload/
+          cd build && zip -r OpenXcom-unsigned.ipa Payload
 
       - uses: actions/upload-artifact@v4
         with:
           name: openxcom-unsigned-ipa
-          path: build/ipa/OpenXcom-unsigned.ipa
+          path: build/OpenXcom-unsigned.ipa
