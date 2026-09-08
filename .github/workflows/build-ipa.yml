@@ -13,22 +13,20 @@ jobs:
           ref: oxce-plus
           submodules: recursive
 
-      - name: Get available schemes
-        id: schemes
+      - name: List targets and schemes (diagnostic only)
         continue-on-error: true
         run: |
-          echo "=== Full xcodebuild -list output ==="
-          xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj 2>&1
+          echo "=== Listing targets ==="
+          xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj 2>&1 | tee xcode-list.txt || true
           echo ""
-          echo "=== Extracting scheme name ==="
-          SCHEMES=$(xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj 2>&1 | grep -A 100 "Schemes:" | head -20)
-          echo "$SCHEMES"
+          echo "=== Extracted targets ==="
+          grep -E "Targets:|^\s+-" xcode-list.txt || echo "No targets found in output"
 
-      - name: Build unsigned archive
+      - name: Build unsigned archive using target
         run: |
           xcodebuild archive \
             -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj \
-            -scheme OpenXcom \
+            -target OpenXcom \
             -configuration Release \
             -sdk iphoneos \
             -archivePath build/OpenXcom.xcarchive \
@@ -40,6 +38,11 @@ jobs:
         run: |
           mkdir -p build/Payload
           APP=$(find build/OpenXcom.xcarchive/Products/Applications -maxdepth 1 -name '*.app' | head -1)
+          if [ -z "$APP" ]; then
+            echo "ERROR: No .app found in archive"
+            ls -la build/OpenXcom.xcarchive/Products/Applications/
+            exit 1
+          fi
           cp -R "$APP" build/Payload/
           cd build && zip -r OpenXcom-unsigned.ipa Payload
 
