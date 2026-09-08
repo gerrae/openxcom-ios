@@ -12,16 +12,13 @@ jobs:
           ref: oxce-plus
           submodules: recursive
 
-      - name: Check directory structure
+      - name: Verify submodule checkout
         run: |
-          echo "Checking Sources/OpenXcom directory:"
-          ls -la Sources/OpenXcom/ || echo "Sources/OpenXcom not found"
+          echo "Contents of Sources/OpenXcom:"
+          ls -la Sources/OpenXcom/ || echo "ERROR: Sources/OpenXcom not found"
           echo ""
-          echo "Checking for xcode-ios directory:"
-          find Sources/OpenXcom -name "xcode-ios" -type d 2>/dev/null || echo "xcode-ios not found"
-          echo ""
-          echo "Checking for .xcodeproj files:"
-          find Sources/OpenXcom -name "*.xcodeproj" -type d 2>/dev/null || echo "No .xcodeproj files found"
+          echo "Looking for xcode-ios:"
+          find Sources/OpenXcom -maxdepth 2 -name "xcode-ios" -type d || echo "ERROR: xcode-ios directory not found"
 
       - name: List schemes
         run: xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj
