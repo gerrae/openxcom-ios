@@ -12,14 +12,13 @@ jobs:
           ref: oxce-plus
           submodules: recursive
 
-      - name: Merge WarStalkeR's OpenXcomExMore into the source tree
+      - name: Install WarStalkeR's OpenXcomExMore, keep the iOS project
         run: |
           cd Sources/OpenXcom
-          git config user.name "De Rp"
-          git config user.email "donotemail@email.com"
           git remote add oxcem https://github.com/WarStalkeR/OpenXcomExMore
           git fetch oxcem HEAD --depth 200
-          git merge FETCH_HEAD --no-edit -m "Merge OXCEM"
+          git read-tree -u --reset FETCH_HEAD
+          git checkout HEAD -- xcode-ios
 
       - name: List targets
         run: xcodebuild -list -project Sources/OpenXcom/xcode-ios/OpenXcom.xcodeproj
