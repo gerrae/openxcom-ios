@@ -22,7 +22,8 @@ jobs:
             -target OpenXcom \
             -configuration Release \
             -sdk iphoneos \
-            -derivedDataPath build \
+            SYMROOT="$(pwd)/build/sym" \
+            OBJROOT="$(pwd)/build/obj" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY=""
@@ -30,7 +31,7 @@ jobs:
       - name: Package IPA
         run: |
           mkdir -p build/ipa/Payload
-          APP=$(find build/Build/Products -name '*.app' -type d | head -1)
+          APP=$(find build/sym -name '*.app' -type d | head -1)
           cp -R "$APP" build/ipa/Payload/
           cd build/ipa && zip -r OpenXcom-unsigned.ipa Payload
 
